@@ -1,12 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
-
-
-class MoneyOperation(Base):
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user = Column(ForeignKey)
 
 
 class User(Base):
@@ -17,7 +12,13 @@ class User(Base):
     hashed_password = Column(String)
     balance = Column(Integer)
     reg_date = Column(DateTime)
+    operations = relationship('MoneyOperation', back_populates='user', cascade='all, delete')
 
 
-class Goal(Base):
-    pass
+class MoneyOperation(Base):
+    __tablename__ = 'moneyoperation'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User', back_populates='operations')
+    value = Column(Integer)
