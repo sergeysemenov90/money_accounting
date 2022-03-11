@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standart]
+colorama
+sqlalchemy
+psycopg2
+python-dotenv
