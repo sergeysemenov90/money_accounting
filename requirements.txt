@@ -4,3 +4,8 @@ colorama
 sqlalchemy
 psycopg2
 python-dotenv
+requests
+pytest-factoryboy
+pytest-cov
+python-multipart
+alembic

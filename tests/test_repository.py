@@ -1,0 +1,2 @@
+import pytest
+from repositories.fake_repositories import FakeUserRepository
