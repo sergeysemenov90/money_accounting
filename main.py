@@ -2,14 +2,15 @@ from fastapi import FastAPI
 from fastapi import status, Request, Response
 from database import service
 from database.models import MoneyOperation
-from repositories.repository import UserRepository
-from repositories.fake_repositories import FakeUserRepository
+from repositories.repository import UserRepository, MoneyOperationRepository, CategoryRepository
 import logging
 
 app = FastAPI()
 
 logger = logging.getLogger(__name__)
-repository = FakeUserRepository([])
+user_repository = UserRepository()
+operation_repository = MoneyOperationRepository()
+category_repository = CategoryRepository()
 
 
 @app.get('/')
@@ -30,20 +31,43 @@ async def operations():
 
 
 @app.post('/operations')
-async def add_operation(value):
-    user = service.get_user()
-    user['operations'] += value
-    return user
+async def add_operation(request: Request):
+    data = await request.json()
+    operation_repository.add(data)
+    return Response(status_code=201)
 
 
 @app.post('/users')
 async def add_user(request: Request):
-    data = await request.form()
-    repository.add(data)
+    data = await request.json()
+    user_repository.add(data)
     return Response(status_code=201)
 
 
 @app.get('/users')
 async def users_list():
-    return repository.list()
+    users = user_repository.list()
+    return users
 
+
+@app.get('/users/{user_id}')
+async def get_user(user_id: str):
+    user = user_repository.get(user_id)
+    return user
+
+
+@app.post('/categories')
+async def add_category(request: Request):
+    data = await request.json()
+    category_repository.add(data)
+    return Response(status_code=201)
+
+
+
+# TODO: Изменение баланса пользователя при добавлении операции
+# TODO: Вывод списка операций для пользователя
+# TODO: Login/Logout
+# TODO: Личный кабинет для пользователя при входе
+# TODO: Изменение суммы операции
+# TODO:
+# TODO:

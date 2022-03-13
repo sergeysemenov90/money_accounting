@@ -1,11 +1,12 @@
 import requests
 import pytest
 from tests.factories import UserFactory
+import json
 
 
 @pytest.fixture()
 def new_user():
-    return UserFactory(id=1, email='test@test.ru')
+    return UserFactory(email='test@test.ru')
 
 
 @pytest.fixture()
@@ -28,13 +29,8 @@ def test_operations_page():
 def test_add_user(new_user):
     data = new_user.__dict__
     data.pop('_sa_instance_state')
-    print(data)
-    r = requests.post('http://localhost:8000/users', data=data)
+    r = requests.post('http://localhost:8000/users', data=json.dumps(data))
     assert r.status_code == 201
 
 
-def test_new_user_in_db(new_user):
-    r = requests.get('http://localhost:8000/users')
-    print(r.json())
-    assert r.status_code == 200
-    assert new_user.id == int(r.json()['users'][0]['id'])
+
