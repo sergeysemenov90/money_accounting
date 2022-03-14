@@ -4,16 +4,6 @@ from tests.factories import UserFactory
 import json
 
 
-@pytest.fixture()
-def new_user():
-    return UserFactory(email='test@test.ru')
-
-
-@pytest.fixture()
-def another_user():
-    return UserFactory(email='test@test2.ru')
-
-
 def test_home_page():
     r = requests.get('http://localhost:8000/home')
     assert r.status_code == 200

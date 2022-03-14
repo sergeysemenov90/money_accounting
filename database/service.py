@@ -11,3 +11,7 @@ def get_user():
             }
     return user
 
+
+def change_user_balance(operation):
+    user = operation.user
+    user.balance += operation.value

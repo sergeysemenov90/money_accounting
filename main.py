@@ -62,9 +62,8 @@ async def add_category(request: Request):
     category_repository.add(data)
     return Response(status_code=201)
 
-
-
 # TODO: Изменение баланса пользователя при добавлении операции
+# TODO: Разобраться, где хранить бизнес-процессы (изменение баланса, )
 # TODO: Вывод списка операций для пользователя
 # TODO: Login/Logout
 # TODO: Личный кабинет для пользователя при входе
