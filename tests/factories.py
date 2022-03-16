@@ -1,6 +1,6 @@
 import factory
 
-from database.models import User, MoneyOperation
+from database.models import User, MoneyOperation, Category
 
 
 class UserFactory(factory.Factory):
@@ -17,3 +17,11 @@ class MoneyOperationFactory(factory.Factory):
 
     class Meta:
         model = MoneyOperation
+
+
+class CategoryFactory(factory.Factory):
+    id = 1
+    name = 'Без категории'
+
+    class Meta:
+        model = Category

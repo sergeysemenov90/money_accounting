@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi import status, Request, Response
+
+from business.registration import register_user
 from database import service
-from database.models import MoneyOperation
+from database.models import MoneyOperation, User, Category
 from repositories.repository import UserRepository, MoneyOperationRepository, CategoryRepository
 import logging
 
@@ -18,30 +20,44 @@ async def root():
     return {'Hello!': 'Everything works!'}
 
 
-@app.get('/home')
-async def home():
-    user = service.get_user()
-    return user
+@app.get('/register')
+async def get_registration(request: Request):
+    pass
 
 
-@app.get('/operations')
-async def operations():
-    user = service.get_user()
-    return {'operations': user['operations']}
+@app.post('/register')
+async def post_registration(request: Request):
+    reg_data = await request.json()
+    user = register_user(reg_data)
+    if user:
+        user_repository.add(user)
+        return Response(content=user, status_code=201)
 
 
-@app.post('/operations')
+@app.get('/login')
+async def get_login(request: Request):
+    pass
+
+
+@app.post('/login')
+async def post_login(request: Request):
+    pass
+
+
+@app.post('/{user_id}/operations')
 async def add_operation(request: Request):
     data = await request.json()
-    operation_repository.add(data)
-    return Response(status_code=201)
+    operation = MoneyOperation(**data)
+    operation_repository.add(operation)
+    return Response(content=operation, status_code=201)
 
 
 @app.post('/users')
 async def add_user(request: Request):
     data = await request.json()
-    user_repository.add(data)
-    return Response(status_code=201)
+    user = User(**data)
+    user_repository.add(user)
+    return Response(content=user, status_code=201)
 
 
 @app.get('/users')
@@ -59,13 +75,20 @@ async def get_user(user_id: str):
 @app.post('/categories')
 async def add_category(request: Request):
     data = await request.json()
-    category_repository.add(data)
-    return Response(status_code=201)
+    category = Category(**data)
+    category_repository.add(category)
+    return Response(content=category, status_code=201)
 
-# TODO: Изменение баланса пользователя при добавлении операции
-# TODO: Разобраться, где хранить бизнес-процессы (изменение баланса, )
-# TODO: Вывод списка операций для пользователя
+
+@app.get('/{user_id}/operations')
+async def get_user_operations(user_id: int):
+    user = user_repository.get(user_id)
+    return {'operations': user.operations}
+
+
+# TODO: Протестировать api (правильность работы всех роутов)
 # TODO: Login/Logout
+# TODO: Добавить к роутам защиту от получения чужих данных
 # TODO: Личный кабинет для пользователя при входе
 # TODO: Изменение суммы операции
 # TODO:

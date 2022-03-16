@@ -10,8 +10,3 @@ def get_user():
             'operations': [-3000, 2500, 2800, -1800],
             }
     return user
-
-
-def change_user_balance(operation):
-    user = operation.user
-    user.balance += operation.value
