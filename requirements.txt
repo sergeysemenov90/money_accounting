@@ -9,3 +9,6 @@ pytest-factoryboy
 pytest-cov
 python-multipart
 alembic
+python-multipart
+python-jose
+passlib[bcrypt]

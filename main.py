@@ -1,8 +1,8 @@
-from fastapi import FastAPI
-from fastapi import status, Request, Response
+from fastapi import FastAPI, Depends
+from fastapi import Request, Response
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from business.registration import register_user
-from database import service
+from business.registration import check_and_update_register_data, password_hasher
 from database.models import MoneyOperation, User, Category
 from repositories.repository import UserRepository, MoneyOperationRepository, CategoryRepository
 import logging
@@ -10,6 +10,9 @@ import logging
 app = FastAPI()
 
 logger = logging.getLogger(__name__)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 user_repository = UserRepository()
 operation_repository = MoneyOperationRepository()
 category_repository = CategoryRepository()
@@ -28,10 +31,12 @@ async def get_registration(request: Request):
 @app.post('/register')
 async def post_registration(request: Request):
     reg_data = await request.json()
-    user = register_user(reg_data)
+    confirm_data = check_and_update_register_data(reg_data)
+    user = User(**confirm_data)
     if user:
         user_repository.add(user)
         return Response(content=user, status_code=201)
+    return Response(status_code=400)
 
 
 @app.get('/login')
@@ -39,13 +44,19 @@ async def get_login(request: Request):
     pass
 
 
-@app.post('/login')
-async def post_login(request: Request):
-    pass
+@app.post('/token')
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = user_repository.get(form_data.username)
+    if not user:
+        return Response(content={'message': 'Incorrect username or password'}, status_code=400)
+    hashed_password = password_hasher(form_data.password)
+    if user.hashed_password == hashed_password:
+        return {'access_token': user.email, 'token_type': 'bearer'}
+    return Response(content={'message': 'Incorrect username or password'}, status_code=400)
 
 
 @app.post('/{user_id}/operations')
-async def add_operation(request: Request):
+async def add_operation(request: Request, token: str = Depends(oauth2_scheme)):
     data = await request.json()
     operation = MoneyOperation(**data)
     operation_repository.add(operation)
@@ -61,19 +72,19 @@ async def add_user(request: Request):
 
 
 @app.get('/users')
-async def users_list():
+async def users_list(token: str = Depends(oauth2_scheme)):
     users = user_repository.list()
     return users
 
 
 @app.get('/users/{user_id}')
-async def get_user(user_id: str):
+async def get_user(user_id: str, token: str = Depends(oauth2_scheme)):
     user = user_repository.get(user_id)
     return user
 
 
 @app.post('/categories')
-async def add_category(request: Request):
+async def add_category(request: Request, token: str = Depends(oauth2_scheme)):
     data = await request.json()
     category = Category(**data)
     category_repository.add(category)
@@ -81,7 +92,7 @@ async def add_category(request: Request):
 
 
 @app.get('/{user_id}/operations')
-async def get_user_operations(user_id: int):
+async def get_user_operations(user_id: int, token: str = Depends(oauth2_scheme)):
     user = user_repository.get(user_id)
     return {'operations': user.operations}
 

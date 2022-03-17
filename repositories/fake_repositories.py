@@ -2,8 +2,8 @@ class FakeUserRepository:
     def __init__(self, users):
         self.users = list(users)
 
-    def get(self, id):
-        return next(user for user in self.users if user.id == id)
+    def get(self, email):
+        return next(user for user in self.users if user.email == email)
 
     def add(self, user):
         self.users.append(user)
