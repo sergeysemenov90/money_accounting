@@ -1,11 +1,5 @@
 from tests.factories import UserFactory
-from business.registration import check_and_update_register_data, password_hasher
-
-
-def test_user_password_was_hashed():
-    password_to_hash = 'abc' * 3
-    hashed_password = password_hasher(password_to_hash)
-    assert hashed_password == 'fakehashed' + password_to_hash
+from business.registration import check_and_update_register_data, password_hasher, pwd_context
 
 
 def test_user_can_register_with_correct_data():
@@ -17,6 +11,17 @@ def test_user_can_register_with_correct_data():
     assert confirm_data['email'] == 'test@test.ru'
     assert confirm_data['hashed_password'] is not None
     assert confirm_data['hashed_password'] != 'abc * 3'
+
+
+def test_user_has_hashed_password():
+    reg_data = {'email': 'test@test.ru',
+                'password': 'abc' * 3,
+                'password_again': 'abc' * 3}
+    password = reg_data['password']
+    confirm_data = check_and_update_register_data(reg_data)
+    user = UserFactory(**confirm_data)
+
+    assert pwd_context.verify(password, user.hashed_password)
 
 
 def test_user_cant_register_with_incorrect_password():

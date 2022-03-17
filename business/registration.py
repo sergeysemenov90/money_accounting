@@ -20,4 +20,3 @@ def check_and_update_register_data(reg_data) -> Optional[dict]:
 def password_hasher(password: str) -> str:
     if password:
         return pwd_context.hash(password)
-
