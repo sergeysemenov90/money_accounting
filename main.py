@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi import Request, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from business.authentication import verify_user_password, create_access_token
 from business.registration import check_and_update_register_data, password_hasher
 from database.models import MoneyOperation, User, Category
 from repositories.repository import UserRepository, MoneyOperationRepository, CategoryRepository
@@ -17,6 +18,7 @@ user_repository = UserRepository()
 operation_repository = MoneyOperationRepository()
 category_repository = CategoryRepository()
 
+EXPIRE_DELTA=60
 
 @app.get('/')
 async def root():
@@ -49,8 +51,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = user_repository.get(form_data.username)
     if not user:
         return Response(content={'message': 'Incorrect username or password'}, status_code=400)
-    hashed_password = password_hasher(form_data.password)
-    if user.hashed_password == hashed_password:
+    if verify_user_password(form_data.password, user.hashed_password):
+        create_access_token(email=user.email, expire_delta=EXPIRE_DELTA)
         return {'access_token': user.email, 'token_type': 'bearer'}
     return Response(content={'message': 'Incorrect username or password'}, status_code=400)
 
@@ -95,7 +97,6 @@ async def add_category(request: Request, token: str = Depends(oauth2_scheme)):
 async def get_user_operations(user_id: int, token: str = Depends(oauth2_scheme)):
     user = user_repository.get(user_id)
     return {'operations': user.operations}
-
 
 # TODO: Протестировать api (правильность работы всех роутов)
 # TODO: Login/Logout

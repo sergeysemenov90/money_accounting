@@ -3,7 +3,7 @@ from typing import Optional
 from database.models import User
 from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+hash_scheme = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def check_and_update_register_data(reg_data) -> Optional[dict]:
@@ -19,4 +19,4 @@ def check_and_update_register_data(reg_data) -> Optional[dict]:
 
 def password_hasher(password: str) -> str:
     if password:
-        return pwd_context.hash(password)
+        return hash_scheme.hash(password)

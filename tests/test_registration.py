@@ -1,5 +1,5 @@
 from tests.factories import UserFactory
-from business.registration import check_and_update_register_data, password_hasher, pwd_context
+from business.registration import check_and_update_register_data, password_hasher, hash_scheme
 
 
 def test_user_can_register_with_correct_data():
@@ -21,7 +21,7 @@ def test_user_has_hashed_password():
     confirm_data = check_and_update_register_data(reg_data)
     user = UserFactory(**confirm_data)
 
-    assert pwd_context.verify(password, user.hashed_password)
+    assert hash_scheme.verify(password, user.hashed_password)
 
 
 def test_user_cant_register_with_incorrect_password():
